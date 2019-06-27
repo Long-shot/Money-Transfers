@@ -1,11 +1,15 @@
 package api
 
 import dao.IndexedDao
+import io.ktor.application.ApplicationCall
 import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.ContentTransformationException
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.*
 import model.Account
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.util.*
 
@@ -24,8 +28,10 @@ class RestAPIServer(private val accountsDao: IndexedDao<Account>) {
             get {
                 call.respond(accountsDao.getAll())
             }
+            // create account. Node, that ID passed will be ignored
             post {
-                val account = call.receive<Account>()
+                val account = call.receiveModel<Account>()
+
                 accountsDao.create(account)
                 call.respond(account)
             }
@@ -34,9 +40,13 @@ class RestAPIServer(private val accountsDao: IndexedDao<Account>) {
         route("/accounts/{accountId}") {
             get {
                 val accountID = call.parameters["accountID"]
-                // TODO: install not found pages
-                val uuid = UUID.fromString(accountID) // TODO throw bad request
-                val account = accountsDao.findById(uuid) ?: throw IllegalArgumentException() // TODO throw proper exception (not found)
+                val uuid = try {
+                    UUID.fromString(accountID)
+                } catch (e: IllegalArgumentException) {
+                    throw HttpException(HttpStatusCode.BadRequest, "[$accountID] is not a valid UUID")
+                }
+
+                val account = accountsDao.findById(uuid) ?: throw HttpException(HttpStatusCode.NotFound)
                 call.respond(account)
             }
 
@@ -85,6 +95,18 @@ class RestAPIServer(private val accountsDao: IndexedDao<Account>) {
         post("/transfer") {
             call.respond(mapOf("error" to "notImplementedYet"))
             // TODO
+        }
+    }
+
+    /**
+     * Try to parse model from application call
+     */
+    private suspend inline fun <reified T : Any> ApplicationCall.receiveModel(): T {
+        try {
+            return this.receive()
+        } catch (e: Exception) {
+            val name = T::class.java
+            throw HttpException(HttpStatusCode.BadRequest, "Can not interpret input as [$name]")
         }
     }
 }

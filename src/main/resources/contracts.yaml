@@ -74,11 +74,32 @@ paths:
           format: "uuid"
       responses:
         200:
-          description: "successful fetched given account"
+          description: "successfully fetched given account"
           schema:
             $ref: "#/definitions/Account"
         404:
           description: "invalid account UUID"
+    delete:
+      tags:
+        - "account"
+      summary: "Delete specified account"
+      operationId: "deleteAccount"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accountId"
+          in: "path"
+          description: "ID of account to delete"
+          required: true
+          type: "string"
+          format: "uuid"
+        responses:
+          200:
+            description: "account that was deleted"
+            schema:
+              $ref: "#/definitions/Account"
+          404:
+            description: "invalid account UUID"
 
   /accounts/{accountId}/balance:
     get:
@@ -135,6 +156,7 @@ paths:
             $ref: "#/definitions/Balance"
         404:
           description: "invalid account UUID"
+
   /accounts/{accountId}/withdraw:
     post:
       tags:
@@ -165,6 +187,8 @@ paths:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Balance"
+        400:
+          description: "insufficient funds"
         404:
           description: "invalid account UUID"
 
@@ -183,6 +207,17 @@ paths:
       operationId: "listTransactions"
       produces:
         - "application/json"
+      parameters:
+        - name: "accountFrom"
+            in: "query"
+            schema:
+              type: "string"
+            description: "Id of account issuing transactions"
+        - name: "accountTo"
+            in: "query"
+            schema:
+              type: "string"
+            description: "Id of account receiving transactions"
       responses:
         200:
           description: "successful operation"

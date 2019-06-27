@@ -1,5 +1,6 @@
 package model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.*
 
 /**
@@ -14,5 +15,6 @@ interface IndexedModel {
  * Account represents an Indexed models for storing user account data
  */
 data class Account(val bank: String, val number: String, val user_id: String, val currency: Currency) : IndexedModel {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     override val id = UUID.randomUUID()!!
 }
