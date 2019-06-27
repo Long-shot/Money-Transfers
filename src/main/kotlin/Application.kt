@@ -1,12 +1,9 @@
-package com.example
-
 import api.RestAPIServer
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
 import com.fasterxml.jackson.databind.*
+import dao.InMemoryIndexedDao
 import io.ktor.jackson.jackson
-import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.jetty.*
@@ -19,7 +16,7 @@ fun Application.module() {
     }
 
     routing {
-        RestAPIServer().apply {
+        RestAPIServer(InMemoryIndexedDao()).apply {
             registerAccountAPIs()
             registerTransactionAPIs()
         }

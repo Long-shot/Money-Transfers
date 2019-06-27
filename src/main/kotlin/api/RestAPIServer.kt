@@ -1,18 +1,20 @@
 package api
 
+import dao.IndexedDao
 import io.ktor.application.call
+import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.routing.*
+import model.Account
+import java.lang.IllegalArgumentException
+import java.util.*
 
 /**
  * Money Transfer API
  *
  * This is an API for money transfer
  */
-class RestAPIServer {
+class RestAPIServer(private val accountsDao: IndexedDao<Account>) {
     /**
      * Register account-specific APIs into Ktor routing
      * See Swagger contracts for more detail
@@ -20,23 +22,22 @@ class RestAPIServer {
     fun Routing.registerAccountAPIs() {
         route("/accounts"){
             get {
-                call.respond(mapOf("error" to "notImplementedYet"))
-                // TODO
+                call.respond(accountsDao.getAll())
             }
             post {
-                call.respond(mapOf("error" to "notImplementedYet"))
-                // TODO
+                val account = call.receive<Account>()
+                accountsDao.create(account)
+                call.respond(account)
             }
         }
 
         route("/accounts/{accountId}") {
             get {
-                call.respond(mapOf("error" to "notImplementedYet"))
-                // TODO
-            }
-            post {
-                call.respond(mapOf("error" to "notImplementedYet"))
-                // TODO
+                val accountID = call.parameters["accountID"]
+                // TODO: install not found pages
+                val uuid = UUID.fromString(accountID) // TODO throw bad request
+                val account = accountsDao.findById(uuid) ?: throw IllegalArgumentException() // TODO throw proper exception (not found)
+                call.respond(account)
             }
 
             // technically transaction API probably should not know about account balance
