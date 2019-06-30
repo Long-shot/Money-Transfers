@@ -28,3 +28,12 @@ jobs:
                 path: ~/test-results
             - store_artifacts:
                 path: ~/test-results/junit
+      - run: gradle jacocoTestReport
+      - run:
+          name: upload test coverage
+          command: |
+            if curl --silent --fail https://codecov.io/bash >codecov.sh; then
+              bash <codecov.sh
+            else
+              echo skipping codecov -- script download error
+            fi
