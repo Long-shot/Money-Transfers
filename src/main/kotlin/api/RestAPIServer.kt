@@ -6,6 +6,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
+import io.ktor.request.receiveText
 import io.ktor.response.respond
 import io.ktor.routing.*
 import model.Account
@@ -88,7 +89,11 @@ class RestAPIServer(
                     val account = accountsDao.findById(id) ?: throw HttpException(HttpStatusCode.NotFound)
 
                     val request = call.receiveModel<BalanceModificationRequest>()
-                    call.respond(BalanceResponse(transferEngine.deposit(account, request.amount), account.currency))
+                    try {
+                        call.respond(BalanceResponse(transferEngine.deposit(account, request.amount), account.currency))
+                    } catch (e: Exception) {
+                        processTransferException(e)
+                    }
                 }
             }
 
@@ -98,7 +103,11 @@ class RestAPIServer(
                     val account = accountsDao.findById(id) ?: throw HttpException(HttpStatusCode.NotFound)
 
                     val request = call.receiveModel<BalanceModificationRequest>()
-                    call.respond(BalanceResponse(transferEngine.withdraw(account, request.amount), account.currency))
+                    try {
+                        call.respond(BalanceResponse(transferEngine.withdraw(account, request.amount), account.currency))
+                    } catch (e: Exception) {
+                        processTransferException(e)
+                    }
                 }
             }
         }
@@ -110,9 +119,8 @@ class RestAPIServer(
      */
     fun Routing.registerTransactionAPIs() {
         get("/transactions") {
-            call.respond(transactionDao.getAll())
-            val accountFrom = call.getUUIDFromQueryParameters("accountFrom")
-            val accountTo = call.getUUIDFromQueryParameters("accountTo")
+            val accountFrom = call.getUUIDFromQueryParameters("from")
+            val accountTo = call.getUUIDFromQueryParameters("to")
 
             call.respond(transactionDao.filter {
                 (accountFrom == null || accountFrom == it.accountFrom) && (accountTo == null || accountTo == it.accountTo)
@@ -137,7 +145,11 @@ class RestAPIServer(
                 "Account [${transferRequest.accountTo} not found"
             )
 
-            call.respond(transferEngine.transfer(accountFrom, accountTo, transferRequest.amount))
+            try {
+                call.respond(transferEngine.transfer(accountFrom, accountTo, transferRequest.amount))
+            } catch (e: Exception) {
+                processTransferException(e)
+            }
         }
     }
 

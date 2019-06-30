@@ -39,7 +39,7 @@ class InMemoryIndexedDaoTest {
         fun `creating entries with duplicate id fails`() {
             val entry = createEntry()
             indexedDao.create(entry)
-            assertFailsWith<EntryAlreadyExistsException>{indexedDao.create(entry)}
+            assertFailsWith<EntryAlreadyExistsException> { indexedDao.create(entry) }
         }
     }
 

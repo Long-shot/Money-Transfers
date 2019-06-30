@@ -129,7 +129,7 @@ paths:
       tags:
         - "account"
         - "demo"
-      summary: "Deposit given amount to diven account. This is demo api only"
+      summary: "Deposit given amount to given account. This is demo api only"
       operationId: "deposit"
       parameters:
         - name: "accountId"
@@ -147,7 +147,7 @@ paths:
             properties:
               amount:
                 type: "integer"
-                multipleOf: 0.01
+                multipleOf: 0.0001
                 minimum: 0
       responses:
         200:
@@ -162,7 +162,7 @@ paths:
       tags:
         - "account"
         - "demo"
-      summary: "Deposit given amount to diven account. This is demo api only"
+      summary: "Deposit given amount to given account. This is demo api only"
       operationId: "withdraw"
       parameters:
         - name: "accountId"
@@ -180,7 +180,7 @@ paths:
             properties:
               amount:
                 type: "integer"
-                multipleOf: 0.01
+                multipleOf: 0.0001
                 minimum: 0
       responses:
         200:
@@ -208,12 +208,12 @@ paths:
       produces:
         - "application/json"
       parameters:
-        - name: "accountFrom"
+        - name: "from"
             in: "query"
             schema:
               type: "string"
             description: "Id of account issuing transactions"
-        - name: "accountTo"
+        - name: "to"
             in: "query"
             schema:
               type: "string"
@@ -270,7 +270,19 @@ paths:
         200:
           description: "successfully created transaction. (Check status later)"
           schema:
-            $ref: "#/definitions/Transaction"
+            type: "object"
+            properties:
+              account_from:
+                type: "string"
+                format: "uuid"
+                description: "account to transfer from"
+              account_to:
+                type: "string"
+                format: "uuid"
+                description: "account to transfer to"
+              amount:
+                type: "number"
+                description: "amount to transfer"
         400:
           description: "Invalid transfer details"
 
@@ -317,10 +329,6 @@ definitions:
       currency:
         $ref: "#/definitions/Currency"
       created_at:
-        readOnly: true
-        type: "string"
-        example: "2017-07-21T17:32:28Z"
-      updated_at:
         readOnly: true
         type: "string"
         example: "2017-07-21T17:32:28Z"

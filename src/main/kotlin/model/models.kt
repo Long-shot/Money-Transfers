@@ -16,11 +16,12 @@ interface IndexedModel {
  * Account represents an Indexed models for storing user account data
  */
 data class Account(
+    val bank: String,
     val number: String,
-    val user_id: String,
+    val userId: String,
     val currency: Currency,
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    override val id: UUID = UUID.randomUUID()!!, val bank: String
+    override val id: UUID = UUID.randomUUID()!!
 ) : IndexedModel
 
 /**
@@ -32,6 +33,9 @@ enum class TransactionStatus {
     FAILED,
 }
 
+/**
+ * Representation of transaction information
+ */
 data class Transaction(
     val accountFrom: UUID,
     val accountTo: UUID,
