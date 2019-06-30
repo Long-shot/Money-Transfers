@@ -1,20 +1,29 @@
 import api.HttpException
 import api.RestAPIServer
-import io.ktor.application.*
-import io.ktor.features.ContentNegotiation
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.SerializationFeature
 import dao.InMemoryIndexedDao
+import io.ktor.application.Application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
-import io.ktor.routing.*
-import io.ktor.server.engine.*
-import io.ktor.server.jetty.*
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.jetty.Jetty
+import model.Account
+import model.Transaction
+import transfer.InMemoryTransferEngine
 
 fun Application.module() {
     install(ContentNegotiation) {
         jackson {
             enable(SerializationFeature.INDENT_OUTPUT)
+            propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+            setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
         }
     }
 
@@ -24,7 +33,11 @@ fun Application.module() {
                 call.respond(cause.code, cause.description)
             }
         }
-        RestAPIServer(InMemoryIndexedDao()).apply {
+        val accountsDao = InMemoryIndexedDao<Account>()
+        val transactionsDao = InMemoryIndexedDao<Transaction>()
+        val transferEngine = InMemoryTransferEngine(transactionsDao)
+
+        RestAPIServer(accountsDao, transactionsDao, transferEngine).apply {
             registerAccountAPIs()
             registerTransactionAPIs()
         }

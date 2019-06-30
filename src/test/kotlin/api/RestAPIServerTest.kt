@@ -23,7 +23,7 @@ class RestAPIServerTest {
         @Nested
         inner class Create {
             @Test
-            fun `test create account success`() {
+            fun `valid account creation succeeds`() {
                 val account = createAccount()
 
                 withTestEngine {
@@ -38,10 +38,10 @@ class RestAPIServerTest {
             }
 
             @Test
-            fun `test create invalid account failure`() {
+            fun `invalid account creation fails`() {
                 val account = createAccount(currency = Currency.USD)
                 var json = mapper.writeValueAsString(account)
-                // Set currency to unsupported value
+                // Set currency accountTo unsupported value
                 json = json.replace("USD", "XXX")
 
                 withTestEngine {
@@ -58,7 +58,7 @@ class RestAPIServerTest {
         @Nested
         inner class Read {
             @Test
-            fun `test get all existing accounts`() {
+            fun `get all existing accounts succeeds`() {
                 withTestEngine {
                     for (i in 1..5){
                         val account = createAccount()
@@ -76,7 +76,7 @@ class RestAPIServerTest {
             }
 
             @Test
-            fun `test get single existing account succeeds`() {
+            fun `fetching single existing account succeeds`() {
                 val account = createAccount()
                 var accountID : UUID
                 withTestEngine {
@@ -93,17 +93,50 @@ class RestAPIServerTest {
                     }
                 }
             }
+
+            @Test
+            fun `fetching non-existing account fails`() {
+                val account = createAccount()
+                withTestEngine {
+                    handleRequest(HttpMethod.Get, "/accounts/${account.id}") {
+                        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.apply {
+                        assertEquals(HttpStatusCode.NotFound, response.status())
+                    }
+                }
+            }
         }
         @Nested
         inner class Delete {
             @Test
             fun `test delete account success`() {
-                // TODO
+                val account = createAccount()
+                var accountID : UUID
+                withTestEngine {
+                    createRemoteAccount(account).apply {
+                        accountID = getIDFromJson(response.content!!)
+                    }
+
+                    handleRequest(HttpMethod.Delete, "/accounts/$accountID") {
+                        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.apply {
+                        assertEquals(HttpStatusCode.OK, response.status())
+                        val respAccount = response.readJsonModel<Account>()
+                        assertEquals(account, respAccount)
+                    }
+                }
             }
 
             @Test
             fun `test fail on delete non-existing account`() {
-                // TODO
+                val account = createAccount()
+                withTestEngine {
+                    handleRequest(HttpMethod.Delete, "/accounts/${account.id}") {
+                        addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    }.apply {
+                        assertEquals(HttpStatusCode.NotFound, response.status())
+                    }
+                }
             }
         }
 
@@ -155,27 +188,27 @@ class RestAPIServerTest {
     @Nested
     inner class Transactions {
         @Test
-        fun `test success fetching all transactions`() {
+        fun `fetching all transactions succeeds`() {
             // TODO
         }
 
         @Test
-        fun `test success fetching signle transactions`() {
+        fun `fetching signle transaction succeeds`() {
             // TODO
         }
 
         @Test
-        fun `test fail on fetching non-existent transactions`() {
+        fun `fetching non-existent transaction fails`() {
             // TODO
         }
 
         @Test
-        fun `test filtering on transaction issuer`() {
+        fun `filtering on transaction issuer works`() {
             // TODO
         }
 
         @Test
-        fun `test filtering on transaction receiver`() {
+        fun `filtering on transaction receiver works`() {
             // TODO
         }
     }
@@ -183,27 +216,27 @@ class RestAPIServerTest {
     @Nested
     inner class Transfer {
         @Test
-        fun `test successfull transfer`(){
+        fun `transfers can be performed successfully`(){
             // TODO
         }
 
         @Test
-        fun `test concurrent transfer requests`(){
+        fun `concurrent transfer requests work`(){
             // TODO
         }
 
         @Test
-        fun `test fail in mismatching currencies`() {
+        fun `transfer between accounts with mismatching currencies fails`() {
             // TODO
         }
 
         @Test
-        fun `test fail in insufficient amount`() {
+        fun `transfer fails in case of insufficient amount`() {
             // TODO
         }
 
         @Test
-        fun `test fail on negative transfer amount`() {
+        fun `transfer of negative amount fails`() {
             // TODO
         }
     }
@@ -219,22 +252,22 @@ class RestAPIServerTest {
     ) = Account(bank, number, userId, currency)
 
     /**
-     * Set request body to given object
+     * Set request body accountTo given object
      */
     private fun TestApplicationRequest.setJsonBody(value: Any?) = setBody(mapper.writeValueAsString(value))
 
     /**
-     * Read object from response
+     * Read object accountFrom response
      */
     private inline fun <reified T> TestApplicationResponse.readJsonModel() = mapper.readValue(content, T::class.java)
     /**
-     * Read list of objects from response
+     * Read list of objects accountFrom response
      */
     private inline fun <reified T> TestApplicationResponse.readJsonList() : List<T> = mapper.readValue(content,
         mapper.typeFactory.constructCollectionType(List::class.java, T::class.java))
 
     /**
-     * Fetch UUID from json-encoded object
+     * Fetch UUID accountFrom json-encoded object
      */
     private fun getIDFromJson(json: String) : UUID {
         return UUID.fromString(mapper.readValue(json, ObjectNode::class.java)["id"].asText())

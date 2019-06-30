@@ -20,7 +20,7 @@ class InMemoryIndexedDaoTest {
     @BeforeEach
     fun clear() {
         for (entry in indexedDao.getAll()) {
-            indexedDao.delete(entry)
+            indexedDao.deleteByID(entry.id)
         }
     }
 
@@ -31,8 +31,15 @@ class InMemoryIndexedDaoTest {
             for (i in 0..10) {
                 val entry = createEntry()
                 indexedDao.create(entry)
-                assert(indexedDao.getAll().contains(entry))
+                assertTrue(indexedDao.getAll().contains(entry))
             }
+        }
+
+        @Test
+        fun `creating entries with duplicate id fails`() {
+            val entry = createEntry()
+            indexedDao.create(entry)
+            assertFailsWith<EntryAlreadyExistsException>{indexedDao.create(entry)}
         }
     }
 
@@ -44,15 +51,15 @@ class InMemoryIndexedDaoTest {
             indexedDao.create(entry)
             assertTrue(indexedDao.getAll().contains(entry))
 
-            indexedDao.delete(entry)
+            indexedDao.deleteByID(entry.id)
             assertFalse(indexedDao.getAll().contains(entry))
         }
 
         @Test
-        fun `deleting missing entry throws exception`() {
+        fun `deleting missing entry returns null`() {
             val entry = createEntry()
 
-            assertFailsWith<EntryNotFoundException> { indexedDao.delete(entry) }
+            assertNull(indexedDao.deleteByID(entry.id))
         }
     }
 
