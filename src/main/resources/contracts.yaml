@@ -5,7 +5,6 @@ info:
   title: "Money Transfer API"
   contact:
     email: "gellmark@gmail.com"
-basePath: "/v1"
 tags:
   - name: "account"
     description: "Operations regarding user bank accounts"
@@ -21,7 +20,7 @@ paths:
     post:
       tags:
         - "account"
-      summary: "Add new account to the system"
+      summary: "Add new account to the system. "
       operationId: "addAccount"
       consumes:
         - "application/json"
@@ -30,7 +29,7 @@ paths:
       parameters:
         - in: "body"
           name: "body"
-          description: "account details to be added"
+          description: "account details to be added. Note that ID field will be ignored (it's will be generated remotely)"
           required: true
           schema:
             $ref: "#/definitions/Account"
@@ -93,13 +92,13 @@ paths:
           required: true
           type: "string"
           format: "uuid"
-        responses:
-          200:
-            description: "account that was deleted"
-            schema:
-              $ref: "#/definitions/Account"
-          404:
-            description: "invalid account UUID"
+      responses:
+        200:
+          description: "account that was deleted"
+          schema:
+            $ref: "#/definitions/Account"
+        404:
+          description: "invalid account UUID"
 
   /accounts/{accountId}/balance:
     get:
@@ -149,6 +148,7 @@ paths:
                 type: "integer"
                 multipleOf: 0.0001
                 minimum: 0
+                description: "String or number denoting amount to tarnsfer"
       responses:
         200:
           description: "successful operation"
@@ -182,6 +182,7 @@ paths:
                 type: "integer"
                 multipleOf: 0.0001
                 minimum: 0
+                description: "String or number denoting amount to tarnsfer"
       responses:
         200:
           description: "successful operation"
@@ -191,13 +192,6 @@ paths:
           description: "insufficient funds"
         404:
           description: "invalid account UUID"
-
-
-
-
-
-
-
 
   /transactions:
     get:
@@ -209,15 +203,15 @@ paths:
         - "application/json"
       parameters:
         - name: "from"
-            in: "query"
-            schema:
-              type: "string"
-            description: "Id of account issuing transactions"
+          in: "query"
+          type: "string"
+          format: "uiud"
+          description: "Id of account issuing transaction"
         - name: "to"
-            in: "query"
-            schema:
-              type: "string"
-            description: "Id of account receiving transactions"
+          in: "query"
+          type: "string"
+          format: "uuid"
+          description: "Id of account receiving transactions"
       responses:
         200:
           description: "successful operation"
@@ -265,11 +259,6 @@ paths:
           description: "transaction details"
           required: true
           schema:
-            $ref: "#/definitions/Transaction"
-      responses:
-        200:
-          description: "successfully created transaction. (Check status later)"
-          schema:
             type: "object"
             properties:
               account_from:
@@ -283,6 +272,11 @@ paths:
               amount:
                 type: "number"
                 description: "amount to transfer"
+      responses:
+        200:
+          description: "successfully created transaction. (Check status later)"
+          schema:
+            $ref: "#/definitions/Transaction"
         400:
           description: "Invalid transfer details"
 
@@ -330,15 +324,19 @@ definitions:
         $ref: "#/definitions/Currency"
       created_at:
         readOnly: true
-        type: "string"
-        example: "2017-07-21T17:32:28Z"
+        type: "integer"
+        example: "1561944155630"
+      updated_at:
+        readOnly: true
+        type: "integer"
+        example: "1561944155635"
       status:
         readOnly: true
         type: "string"
         enum:
-          - pending
-          - failed
-          - completed
+          - PENDING
+          - FAILED
+          - SUCCESS
       error:
         readOnly: true
         type: string
@@ -366,7 +364,3 @@ definitions:
         $ref: "#/definitions/Currency"
     required:
       - balance
-
-
-
-
