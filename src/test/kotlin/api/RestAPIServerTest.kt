@@ -98,6 +98,15 @@ class RestAPIServerTest {
             }
 
             @Test
+            fun `fetching account with non-uuid name yields bad request`() {
+                withTestEngine {
+                    handleRequest(HttpMethod.Get, "/accounts/not-a-uuid").apply {
+                        assertEquals(HttpStatusCode.BadRequest, response.status())
+                    }
+                }
+            }
+
+            @Test
             fun `fetching non-existing account fails`() {
                 val account = createAccount()
                 withTestEngine {
@@ -180,6 +189,19 @@ class RestAPIServerTest {
                     }
                 }
             }
+//
+//            @Test
+//            fun `test error on invalid amount`() {
+//                withTestEngine {
+//                    val accountID = createRemoteAccount(account)
+//                    val depositRequest = BalanceModificationRequest(-BigDecimal.TEN.setScale(4))
+//                    handleRequest(HttpMethod.Post, "/accounts/$accountID/deposit") {
+//                        setJsonBody(depositRequest)
+//                    }.apply {
+//                        assertEquals(HttpStatusCode.BadRequest, response.status())
+//                    }
+//                }
+//            }
 
             @Test
             fun `test error on deposit to non-existent account`() {
@@ -240,6 +262,19 @@ class RestAPIServerTest {
                     }
                 }
             }
+
+            @Test
+            fun `test error on invalid amount`() {
+                withTestEngine {
+                    val accountID = createRemoteAccount(account)
+                    val depositRequest = BalanceModificationRequest(-BigDecimal.TEN.setScale(4))
+                    handleRequest(HttpMethod.Post, "/accounts/$accountID/withdraw") {
+                        setJsonBody(depositRequest)
+                    }.apply {
+                        assertEquals(HttpStatusCode.BadRequest, response.status())
+                    }
+                }
+            }
         }
     }
 
@@ -291,6 +326,26 @@ class RestAPIServerTest {
                         val transaction = response.readJsonModel<Transaction>()
                         assertEquals(transaction.amount, BigDecimal.ONE)
                     }
+                }
+            }
+        }
+
+        @Test
+        fun `transactions between non-existing accounts result in error`() {
+            withTestEngine {
+                val accountID1 = createRemoteAccount(accountFrom)
+                val nonExistingID = UUID.randomUUID()
+
+                handleRequest(HttpMethod.Post, "/transfer") {
+                    setJsonBody(TransferRequest(accountID1, nonExistingID, BigDecimal.ONE))
+                }.apply {
+                    assertEquals(HttpStatusCode.BadRequest, response.status())
+                }
+
+                handleRequest(HttpMethod.Post, "/transfer") {
+                    setJsonBody(TransferRequest(nonExistingID, accountID1, BigDecimal.ONE))
+                }.apply {
+                    assertEquals(HttpStatusCode.BadRequest, response.status())
                 }
             }
         }
