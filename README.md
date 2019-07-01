@@ -1,11 +1,11 @@
 # Money Transfer API
 [![CircleCI](https://circleci.com/gh/Long-shot/Money-Transfers.svg?style=svg)](https://circleci.com/gh/Long-shot/Money-Transfers)
 [![codecov](https://codecov.io/gh/Long-shot/Money-Transfers/branch/master/graph/badge.svg)](https://codecov.io/gh/Long-shot/Money-Transfers)
-<img src="http://online.swagger.io/validator?url=http://online.swagger.io/validator?url=https://github.com/Long-shot/Money-Transfers/blob/master/src/main/resources/contracts.yaml">
 ### Problem Statement
 Design and implement a RESTful API (including data model and the backing implementation)
 for money transfers between accounts.
 
+[Link to API documentation](https://editor.swagger.io/?url=https://raw.githubusercontent.com/Long-shot/Money-Transfers/master/src/main/resources/contracts.yaml) 
 ### Development notes
 
 First step was developing [contracts](./src/main/resources/contracts.yaml) (OpenAPI contracts can be viewed [here](https://editor.swagger.io) ). 
