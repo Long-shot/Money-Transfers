@@ -1,4 +1,6 @@
 # Money Transfer API
+[![CircleCI](https://circleci.com/gh/Long-shot/Money-Transfers.svg?style=svg)](https://circleci.com/gh/Long-shot/Money-Transfers)
+[![codecov](https://codecov.io/gh/Long-shot/Money-Transfers/branch/master/graph/badge.svg)](https://codecov.io/gh/Long-shot/Money-Transfers)
 
 ### Problem Statement
 Design and implement a RESTful API (including data model and the backing implementation)
