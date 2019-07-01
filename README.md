@@ -16,7 +16,7 @@ Some factors such as server configs, logging,  implementing client, better test/
 
 Due to Jetty running in Debug-level modes, one can see errors while running Jar. It's normal behaviour(apparently see https://github.com/eclipse/jetty.project/issues/3529)
 
-Unfortunately, Jacoco fails to correctly check some functions, but this close enough. 
+Unfortunately, Jacoco fails to correctly check some functions, so coverage is not precise, but this close enough. 
 ### How to run 
 There are two ways to run project: 
 
