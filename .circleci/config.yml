@@ -1,0 +1,39 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8u181-jdk-stretch
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle" }}
+      - run: gradle assemble
+      - run: gradle build
+      - run: gradle test
+      - store_artifacts:
+          path: build/distributions
+          destination: distributions
+      - store_artifacts:
+          path: build/libs
+          destination: libs
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
+      - run: gradle jacocoTestReport
+      - run:
+          name: upload test coverage
+          command: |
+            if curl --silent --fail https://codecov.io/bash >codecov.sh; then
+              bash <codecov.sh
+            else
+              echo skipping codecov -- script download error
+            fi
