@@ -14,7 +14,7 @@ I tried using KTor generator from swagger, but produced result was mediocre, so 
 
 Some factors such as server configs, logging,  implementing client, better test/deploy automation or comprehensive mocking are left out of scope.
 
-Due to Jetty running in Debug-level modes, one can see errors there. It's normal behaviour(apparently see https://github.com/eclipse/jetty.project/issues/3529)
+Due to Jetty running in Debug-level modes, one can see errors while running Jar. It's normal behaviour(apparently see https://github.com/eclipse/jetty.project/issues/3529)
 
 Unfortunately, Jacoco fails to correctly check some functions, but this close enough. 
 ### How to run 
