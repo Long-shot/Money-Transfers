@@ -36,3 +36,5 @@ to run tests:
 ```
 ./gradlew test
 ```
+
+Also link to latest Jar can be found in Artifacts of [latest build](https://circleci.com/gh/Long-shot/Money-Transfers/tree/master) on CircleCI
