@@ -18,6 +18,9 @@ Due to Jetty running in Debug-level modes, one can see errors while running Jar.
 
 Unfortunately, Jacoco fails to correctly check some functions, so coverage is not precise, but this close enough. 
 ### How to run 
+By default server runs on port 8080
+
+
 There are two ways to run project: 
 
 - direct
